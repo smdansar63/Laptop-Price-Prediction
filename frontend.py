@@ -1,5 +1,5 @@
 import streamlit as st 
-import pickle
+import requests
 import pandas as pd 
 
 
@@ -8,10 +8,6 @@ st.set_page_config(
     page_icon="💻",
     layout="centered"
 )
-
-with open("laptop_price_model.sav", "rb") as file:
-    loaded_model = pickle.load(file)
-
 
 st.title("Laptop Price Prediction")
 
@@ -183,6 +179,18 @@ if st.button("Predict Price"):
         "GPU_model": [gpu_model]
     })
 
-    prediction = loaded_model.predict(input_df)
+    try:
+        response = requests.post(
+            "http://127.0.0.1:8000/predict",
+            json=input_df.iloc[0].to_dict(),
+            timeout=10
+        )
 
-    st.success(f"💻 Predicted Laptop Price: €{prediction[0]:,.2f}")
+        if response.status_code == 200:
+            prediction = response.json()["prediction"]
+            st.success(f"💻 Predicted Laptop Price: €{prediction:,.2f}")
+        else:
+            st.error("Prediction failed.")
+
+    except requests.exceptions.ConnectionError:
+        st.error("FastAPI server is not running. Please start the backend first.")
