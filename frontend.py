@@ -181,7 +181,7 @@ if st.button("Predict Price"):
 
     try:
         response = requests.post(
-            "http://127.0.0.1:8000/predict",
+            "https://laptop-price-prediction-mbp5.onrender.com/predict",
             json=input_df.iloc[0].to_dict(),
             timeout=10
         )
